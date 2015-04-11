@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="cache-control" content="no-cache">
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-9">
+<title>Nanonet Port Guard</title>
+
+<!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
+
+<!-- Optional theme -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap-theme.min.css">
+<style>
+html,
+body {
+  height: 100%;
+}
+#wrap {
+  min-height: 100%;
+  height: auto;
+  margin: 0 auto -50px;
+  padding: 0 10px 50px;
+}
+#footer {
+  background-color:#666666; 
+  color:#ffffff;
+  height: 50px;
+}
+</style>
+
+<script src="wsfunc.js"></script>
+<script src="nnet_lib.js"></script>
+<script src="bigint.js"></script>
+<script src="libcrypt.min.js"></script>
+</head>
+
+<body onLoad="init_page()">
+
+<script>
+serverindex=serverindextmp=0;
+var uid_demo="eXTSbDvmkFD6OtChrKAWcWJkUKenaot78pRCQyjqXnH3Hn6InCK5f7+hwkoOITYY";
+var nid_demo="S12233445500:1";
+
+////////////////////////////
+function init_nnet(){
+
+	nnet_serverkeys = [
+    		{"alias":"S1", "nid":"", "uid":""},
+		{"alias":"S2", "nid":"", "uid":""},
+		{"alias":"S3", "nid":"", "uid":""},
+		{"alias":"S4", "nid":"", "uid":""},
+		{"alias":"S5", "nid":"", "uid":""}
+	]; 
+	alslist =["als1","als2","als3","als4","als5"];
+	tablist =["tab1","tab2","tab3","tab4","tab5"];
+	loadkeys_all();
+
+	nnet_nodeid=nnet_serverkeys[serverindex].nid;
+	nnet_uid=nnet_serverkeys[serverindex].uid;
+
+	if (nnet_nodeid==null || nnet_uid==null) {
+		keych();
+		in_nid.value="Enter NodeID and UidKey";
+	}
+
+    nnet_server = "ws://69.28.92.166:9090";
+    //nnet_server = "ws://192.168.1.12:9090";
+    nnet_seccl=0;
+    nnet_isEncrypt=1; 
+    p_src=p_dest=p_command=p_data=0;
+}
+
+function init_page(){
+   init_nnet();
+   nnet_connect();
+}
+
+function ws_onOpen(){
+    nnet_login();
+}
+
+function set_yolla(x){
+    nnet_send_pkg(nnet_nodeid,"PUT","SSH="+x);
+    mesaj_div.innerHTML=">>>";
+}
+
+function nnet_get_pkg(xd) {
+var ret;
+        ret=nnet_parse_pkg(xd); if (ret) {console.log("<-:"+xd); return;}
+        if (p_command=="ERR") {mesaj_div.innerHTML="Error:"+p_data;return;}
+        
+        mesaj_div.innerHTML=p_data;      
+}
+</script>
+<div class="container" id="wrap">
+
+<div id="wssupyes" style="background-color:#99CC99"></div>
+<div id="wssupno" style="background-color:#ff0000"></div>
+<div id="storage0" style="background-color:#ff0000"></div>
+<br>
+
+<div class="panel panel-primary">
+    <div class="panel-heading">
+        <h3><a href="http://www.otermo.com" target="_blank" style="color:#00ff00">Nanonet</a> Connect Status: <span id="statws"></span></h3>
+        <button type="button" class="btn btn-default" aria-label="Left Align" onClick="disconnect()">
+        <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+        Disconnect
+        </button>
+        <button type="button" class="btn btn-default" aria-label="Left Align" onClick="connect()">
+            <span class="glyphicon glyphicon-off" aria-hidden="true"></span>
+            Connect
+        </button>
+	<button type="button" class="btn btn-default pull-right" aria-label="Left Align" onClick="keych()">
+            <span class="glyphicon glyphicon-wrench" aria-hidden="true"></span>
+            Edit Keys
+        </button>
+    </div>
+</div>
+
+	<script>
+	function keych(){
+		serverindex=serverindextmp;
+		tabcolor(serverindex);
+		if (keys.style.display=='block') keys.style.display='none'; else keys.style.display='block';
+		in_uid.value=nnet_uid;
+		in_nid.value=nnet_nodeid;
+		in_alias.value=nnet_serverkeys[serverindex].alias;
+		serverindextmp=serverindex;
+	}
+	function loaddemokeys(){
+                in_uid.value=uid_demo;
+                in_nid.value=nid_demo;
+                in_alias.value="Demo";
+	}
+	function loadkeys_all() {
+		var i;
+		if (localStorage.serverindex==null) localStorage.serverindex=0;
+		if (localStorage.servers==null) localStorage.servers=JSON.stringify(nnet_serverkeys);
+		serverindex=serverindextmp=localStorage.serverindex;
+		nnet_serverkeys=JSON.parse(localStorage.servers);
+		for (i=0; i<5; i++) 
+			document.getElementById(alslist[i]).innerHTML=nnet_serverkeys[i].alias;
+		srvi.innerHTML=nnet_serverkeys[serverindex].alias;
+                tabcolor(serverindex);
+	}
+	function savelocal(){
+		nnet_serverkeys[serverindex].alias=in_alias.value;
+		nnet_nodeid=nnet_serverkeys[serverindex].nid=in_nid.value;
+		nnet_uid=nnet_serverkeys[serverindex].uid=in_uid.value;
+		document.getElementById(alslist[serverindex]).innerHTML=in_alias.value;
+		srvi.innerHTML=in_alias.value;
+		localStorage.serverindex=serverindex;
+		localStorage.servers=JSON.stringify(nnet_serverkeys);
+		serverindextmp=serverindex;
+		keych();
+                connect();
+	}	
+	function tabcolor(x) {
+		var i;
+		for (i=0; i<5; i++) document.getElementById(tablist[i]).className="";
+		document.getElementById(tablist[serverindex]).className="active";
+	}
+	function loadkey(){
+		in_alias.value=nnet_serverkeys[serverindex].alias;
+		in_nid.value=nnet_serverkeys[serverindex].nid;
+		in_uid.value=nnet_serverkeys[serverindex].uid;
+		tabcolor(serverindex);
+	}
+	</script>
+	
+        <div style="display:none;" id="keys">
+            <ul class="nav nav-pills">
+                <li role="presentation" id="tab1"><a href="#" onClick="serverindex=0; loadkey()">Server1 (<span id="als1"></span>)</a></li>
+                <li role="presentation" id="tab2"><a href="#" onClick="serverindex=1; loadkey()">Server2 (<span id="als2"></span>)</a></li>
+                <li role="presentation" id="tab3"><a href="#" onClick="serverindex=2; loadkey()">Server3 (<span id="als3"></span>)</a></li>
+                <li role="presentation" id="tab4"><a href="#" onClick="serverindex=3; loadkey()">Server4 (<span id="als4"></span>)</a></li>
+                <li role="presentation" id="tab5"><a href="#" onClick="serverindex=4; loadkey()">Server5 (<span id="als5"></span>)</a></li>								
+            </ul>
+            <div class="panel" style="background-color:#CCFFCC">
+            <div class="panel-heading">
+		<div class="input-group">
+                    <span class="input-group-addon" id="sizing-addon2">Alias</span>
+  			<input type="text" class="form-control" placeholder="Alias" aria-describedby="sizing-addon2" id="in_alias">
+		</div>
+		<br>
+		<div class="input-group">
+                    <span class="input-group-addon" id="sizing-addon2">NodeID</span>
+                    <input type="text" class="form-control" placeholder="NodeID" aria-describedby="sizing-addon2" id="in_nid">
+			<span class="input-group-btn">
+                            <button class="btn btn-default" type="button" onClick="loaddemokeys()">Load Demo Keys ?</button>
+      			</span>
+		</div>
+		<br>
+		<div class="input-group">
+                    <span class="input-group-addon" id="sizing-addon2">Uid Key</span>
+                    <input type="text" class="form-control" placeholder="UidKey" aria-describedby="sizing-addon2" id="in_uid">
+                    <span class="input-group-btn">
+                        <button class="btn btn-default" type="button" onClick="savelocal()">Save & Active</button>
+                    </span>
+		</div>		
+	</div>
+        </div>
+    </div>
+    <div class="input-group">
+      <span class="input-group-btn">
+          <button class="btn btn-default" type="button" onClick="put()">Get SSH Status for (<span id="srvi" style="color:#ff0000"></span>)</button>
+      </span>
+     <input type="text" class="form-control" placeholder="" value="Status" id="in1">        
+    </div><!-- /input-group -->
+    
+    <h2>
+    <div class="panel" style="background-color:#000000; color:#00ff00">
+        <div class="panel-heading" id="mesaj_div">...</div>
+    </div>
+    </h2>
+
+    <br>
+    <button type="button" class="btn-danger btn-lg" onClick="set_yolla(0)">SSH OFF</button>
+    <button type="button" class="btn-success btn-lg" onClick="set_yolla(1)">SSH ON</button>
+    <br><br>
+</div>
+<div id="footer">
+    <div class="container">
+        <h6>Nnet Port Guard - SSH Remote ON/ OFF Controller,  © 2015 
+            <a href="http://www.otermo.com" target="_blank" style="color:#00ff00">Nanonet</a>
+        </h6>
+    </div>
+</div>
+  
+<script type="text/javascript">
+
+ if ('WebSocket' in window) {
+ 	//document.getElementById('wssupyes').innerHTML="Websocket supported";
+	}
+ else wssupno.innerHTML="<h2>Websocket NOT supported</h2>";
+ 
+ if(typeof(Storage) !== "undefined") {}
+	else storage0.innerHTML="<h2>Local storage not supported !!!</h2>";
+ 
+function connect(){
+	stopping();
+	if (ws) ws.close();
+	nnet_connect();
+	nnet_seccl=0;
+}
+
+function disconnect(){
+	if (ws) ws.close();
+	nnet_seccl=0;
+}
+  
+function put(){
+     nnet_send_pkg(nnet_nodeid,"PUT",in1.value);
+     mesaj_div.innerHTML=">>>";
+ } 
+</script>
+</body>
+</html>

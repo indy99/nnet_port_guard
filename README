@@ -1,0 +1,105 @@
+// by Ruhsen.k 2015
+
+*****************************
+What "nnet_port_guard" does?
+*****************************
+
+If you have a remote server, probably SSH is open. Hackers know that and make SSH
+attacks to your server. There are some ways to protect like IPTABLES but if your 
+SSH port is keep open, attacks will continue. Your CPU will busy to answer them.
+
+What if SSH port is closed? No open port, no attack. 
+This is why this program created.
+
+If you install "nnet_port_guard" program to your remote server, you can Turn on 
+or OFF SSH Daemon remotely.
+So you can protect against SSH attacks.
+
+****************************************************
+Schematic:
+"nnet_port_guard" > --------- (Nanonet) ---------- <"web interface"
+
+"nnet_port_guard" program first reads NodeID and UidKey from conf file, 
+than connect to a Realtime Server named "Nanonet". 
+(web address is http://www.otermo.com) 
+Than wait for commands. 
+*****************************************************
+**You must run as root (sudo) it to control SSH daemon**
+*****************************************************
+
+Control interface is a web application written html and Javascript code.
+Under "web" directory there is a file named "nnet_port_guard.html". 
+Open it on any web browser, click "Edit Keys" and "Load Demo Keys" than "Save". 
+(or on web: http://otermo.com/RTN/dosyalar/nnet_port_guard/nnet_port_guard.html)
+This process save demo keys to your web browser's local storage. 
+Click "Connect" button to connect "Nanonet" Realtime server. 
+Than you can send commands to your server over "Nanonet" and can control your remote 
+SSH daemon anywhere.
+
+If "Nanonet" server connection disconnected for any reasons, "nnet_port_guard" 
+program automatically opens SSH daemon.
+
+Connection is encrypted.
+
+This programs has demo keys, and points to one of my server. For demo you can 
+control it.
+
+To have your private connection on "Nanonet" please email me: nnet.server[at]gmail.com 
+and get your NodeID and UidKey. (it is free) 
+
+Paste these keys both:
+1. "nnet_port_guard.conf" under "src" (you should restart "nnet_port_guard") 
+2. open "nnet_port_guard.html" in a web browser and click "Edit Keys".
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+Tested on Ubuntu and Raspbian
+Program uses this system commands:
+"service ssh start"
+"service ssh stop"
+"service ssh status"
+
+if your OS not have "service" command, try
+/etc/init.d/ssh start, stop or status
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+*****************************
+INSTALL
+*****************************
+
+chmod +x autogen.sh
+./autogen.sh
+./configure
+make
+make install
+
+read INSTALL for details
+
+and
+
+"nnet_port_guard" program needs config file :"nnet_port_guard.conf"
+if you "make install", "nnet_port_guard" program install to system bin and 
+config file "nnet_port_guard.conf" copy to /etc/nnet_port_guard/
+
+if you just "make" these files keeps local.
+
+Program first try to find config file in localdir, than try 
+/etc/nnet_port_guard/ 
+If can not find it, halt.
+
+To run program in console 
+    $x > nnet_port_guard
+To run in background (daemonize) 
+    $x > nnet_port_guard -d
+or 
+    $x > nnet_port_guard --help
+
+if you wish program to start in boot automatically you can search rc.local or
+update-rc stuff...
+
+*****************************
+Some things
+*****************************
+Web interface can run from local. You dont need to put its files to a web server. 
+Tested on Chrome and Firefox, but IE can have problems about localStorage 
+when local run.
+*********************************************************************
