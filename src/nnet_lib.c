@@ -9,12 +9,13 @@
 
 #define PAKETBASRAW     '1'
 #define PAKETSON        "\x0d\x0a\x0a\x0d"
+#define size_paketbas   1
 #define size_paketson   4
 #define SERVERNODEIP    "000000000000"
 
-#define COM_LOG     "LOG"
-#define COM_PUT     "PUT"
-#define COM_PIN     "PIN"
+#define COM_LOG     (char*)"LOG"
+#define COM_PUT     (char*)"PUT"
+#define COM_PIN     (char*)"PIN"
 
 #define ENCRYPT_YES     1
 #define ENCRYPT_NO      0
@@ -53,10 +54,12 @@ struct nnet_ nnet;
  }
 
 int nnet_send_pkg(char *destid, char *komut, char *data) {
-char pak[size_packetmax], *p1;
+char pak[size_packetmax+1], *p1;
 unsigned char *enc;
 crypt_long len;
 unsigned int blen;
+
+    if (strlen(data)>size_maxdatalen) return 1;
 
     if (nnet.seccl[0]) {
         sprintf(pak+1,";src=%s&dest=%s&;%s;%s",nnet.nodeid,destid,komut,data);
@@ -64,13 +67,14 @@ unsigned int blen;
         p1=base64(enc,len, &blen);
         free(enc);
         if (blen==0) {free(p1); return 2;}
+        if (blen+size_paketbas+size_paketson > size_packetmax) {free(p1); return 3;}
         pak[0]='1';
         sprintf(pak,"1%s%s",p1,PAKETSON);
         free(p1);
     }
     else
         sprintf(pak,"1;src=%s&dest=%s&;%s;%s%s",nnet.nodeid,destid,komut,data,PAKETSON);
-    if (send(nnet.socket,pak,strlen(pak),0)<0) return 1;
+    if (send(nnet.socket,pak,strlen(pak),0)<0) return 4;
     return 0;
 }
 
