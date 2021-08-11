@@ -21,7 +21,7 @@ Schematic:
 
 "nnet_port_guard" program first reads NodeID and UidKey from conf file, 
 than connect to a Realtime Server named "Nanonet". 
-(web address is http://www.otermo.com) 
+(web address is http://nnet.elitendustriyel.com) 
 Than wait for commands. 
 *****************************************************
 **You must run as root (sudo) it to control SSH daemon**
@@ -30,7 +30,7 @@ Than wait for commands.
 Control interface is a web application written html and Javascript code.
 Under "web" directory there is a file named "nnet_port_guard.html". 
 Open it on any web browser, click "Edit Keys" and "Load Demo Keys" than "Save". 
-(or on web: http://otermo.com/RTN/dosyalar/nnet_port_guard/nnet_port_guard.html)
+(or on web: http://nnet.elitendustriyel.com/RTN/dosyalar/nnet_port_guard/nnet_port_guard.html)
 This process save demo keys to your web browser's local storage. 
 Click "Connect" button to connect "Nanonet" Realtime server. 
 Than you can send commands to your server over "Nanonet" and can control your remote 
